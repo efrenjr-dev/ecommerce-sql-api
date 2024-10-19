@@ -10,8 +10,98 @@ datasource db {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Cart_Item {
+  id               BigInt           @id @unique @default(autoincrement())
+  createdAt        DateTime         @default(now()) @db.Timestamptz(6)
+  sessionId        BigInt
+  quantity         Int              @default(1) @db.SmallInt
+  productId        String?          @db.Uuid
+  Product          Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Shopping_Session Shopping_Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Order_Details {
+  id              BigInt          @id
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  total           Float           @default(0) @db.Real
+  paymentId       BigInt          @unique
+  userId          String?         @db.Uuid
+  Payment_Details Payment_Details @relation(fields: [paymentId], references: [id])
+  User            User?           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  Order_Item      Order_Item[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Order_Item {
+  id               BigInt           @id @default(autoincrement())
+  createdAt        DateTime         @default(now()) @db.Timestamptz(6)
+  orderId          BigInt
+  quantity         Int              @db.SmallInt
+  productId        String           @db.Uuid
+  Order_Details    Order_Details    @relation(fields: [orderId], references: [id])
+  Product          Product          @relation(fields: [productId], references: [id], onUpdate: Restrict)
+  Shopping_Session Shopping_Session @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "Order_Item_sessionId_fkey")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Payment_Details {
+  id            BigInt         @id @unique @default(autoincrement())
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
+  phpAmount     Int
+  provider      String?        @db.VarChar
+  status        String         @db.VarChar
+  modifiedAt    DateTime       @default(now()) @db.Timestamptz(6)
+  orderId       BigInt
+  Order_Details Order_Details?
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Product {
+  createdAt        DateTime          @default(now()) @db.Timestamptz(6)
+  name             String            @db.VarChar
+  price            Float             @db.Real
+  description      String            @default(" ") @db.VarChar
+  categoryId       BigInt?
+  updatedAt        DateTime          @default(now()) @db.Timestamptz(6)
+  isActive         Boolean           @default(true)
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Cart_Item        Cart_Item[]
+  Order_Item       Order_Item[]
+  Product_Category Product_Category? @relation(fields: [categoryId], references: [id])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Product_Category {
+  id          BigInt    @id @unique @default(autoincrement())
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  name        String    @unique @db.VarChar
+  description String?   @db.VarChar
+  updatedAt   DateTime  @default(now()) @db.Timestamptz(6)
+  Product     Product[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Product_Inventory {
+  id         BigInt   @id @unique @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  quanity    Int      @default(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Shopping_Session {
+  id         BigInt       @id @unique @default(autoincrement())
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  total      Float        @default(0) @db.Real
+  userId     String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Cart_Item  Cart_Item[]
+  Order_Item Order_Item[]
+  User       User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Token {
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
   token       String   @unique
   blacklisted Boolean  @default(false)
   expires     DateTime @db.Timestamptz(6)
@@ -23,14 +113,16 @@ model Token {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model User {
-  created_at      DateTime @default(now()) @db.Timestamptz(6)
-  email           String   @unique @db.VarChar
-  isActive        Boolean  @default(true)
-  isEmailVerified Boolean  @default(false)
-  name            String   @db.VarChar
-  password        String
-  role            String   @default("user") @db.VarChar
-  pk              BigInt   @id @unique @default(autoincrement())
-  id              String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  Token           Token[]
+  createdAt        DateTime          @default(now()) @db.Timestamptz(6)
+  email            String            @unique @db.VarChar
+  isActive         Boolean           @default(true)
+  isEmailVerified  Boolean           @default(false)
+  name             String            @db.VarChar
+  password         String
+  role             String            @default("user") @db.VarChar
+  pk               BigInt            @id @unique @default(autoincrement())
+  id               String            @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Order_Details    Order_Details[]
+  Shopping_Session Shopping_Session?
+  Token            Token[]
 }
