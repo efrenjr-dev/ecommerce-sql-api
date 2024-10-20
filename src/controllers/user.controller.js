@@ -1,12 +1,13 @@
 const httpStatus = require("http-status");
 const logger = require("../config/logger");
-const { userService } = require("../services");
+const { userService, cartService } = require("../services");
 const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
 
 const createUser = catchAsync(async (req, res, next) => {
     logger.debug("CREATE USER");
     const user = await userService.createUser(req.body);
+    if (user.role === "user") await cartService.createCart(req.user.id);
     res.status(httpStatus.CREATED).send(user);
 });
 

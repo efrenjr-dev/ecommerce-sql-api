@@ -15,7 +15,7 @@ model Cart_Item {
   createdAt        DateTime         @default(now()) @db.Timestamptz(6)
   sessionId        BigInt
   quantity         Int              @default(1) @db.SmallInt
-  productId        String           @db.Uuid
+  productId        String           @db.Uuid @unique
   Product          Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
   Shopping_Session Shopping_Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
@@ -34,14 +34,13 @@ model Order_Details {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Order_Item {
-  id               BigInt           @id @default(autoincrement())
-  createdAt        DateTime         @default(now()) @db.Timestamptz(6)
-  orderId          BigInt
-  quantity         Int              @db.SmallInt
-  productId        String           @db.Uuid
-  Order_Details    Order_Details    @relation(fields: [orderId], references: [id])
-  Product          Product          @relation(fields: [productId], references: [id], onUpdate: Restrict)
-  Shopping_Session Shopping_Session @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "Order_Item_sessionId_fkey")
+  id            BigInt        @id @default(autoincrement())
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6)
+  orderId       BigInt
+  quantity      Int           @db.SmallInt
+  productId     String        @db.Uuid
+  Order_Details Order_Details @relation(fields: [orderId], references: [id])
+  Product       Product       @relation(fields: [productId], references: [id], onUpdate: Restrict)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -87,19 +86,18 @@ model Product_Category {
 model Product_Inventory {
   id         BigInt   @id @unique @default(autoincrement())
   created_at DateTime @default(now()) @db.Timestamptz(6)
-  quantity    Int      @default(0)
+  quantity   Int      @default(0)
   Product    Product?
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Shopping_Session {
-  id         BigInt       @id @unique @default(autoincrement())
-  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
-  total      Float        @default(0) @db.Real
-  userId     String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  Cart_Item  Cart_Item[]
-  Order_Item Order_Item[]
-  User       User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id        BigInt      @id @unique @default(autoincrement())
+  createdAt DateTime    @default(now()) @db.Timestamptz(6)
+  total     Float       @default(0) @db.Real
+  userId    String      @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Cart_Item Cart_Item[]
+  User      User        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

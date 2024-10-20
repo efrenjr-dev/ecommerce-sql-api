@@ -8,6 +8,9 @@ const validator = require("express-joi-validation").createValidator({
 
 const router = express.Router();
 
-router.route("/").post(cartController.createCart);
+router
+    .route("/")
+    .get(auth(), cartController.getCart)
+    .put(auth(), cartController.addToCart);
 
 module.exports = router;
