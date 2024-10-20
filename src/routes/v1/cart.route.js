@@ -1,6 +1,6 @@
 const express = require("express");
 const { auth } = require("../../middlewares/auth");
-const { productController } = require("../../controllers/");
+const { cartController } = require("../../controllers/");
 const { userValidation } = require("../../validations");
 const validator = require("express-joi-validation").createValidator({
     passError: true,
@@ -8,14 +8,6 @@ const validator = require("express-joi-validation").createValidator({
 
 const router = express.Router();
 
-router
-    .route("/")
-    .get(productController.getProducts)
-    .post(productController.createProduct);
-
-router
-    .route("/:productId")
-    .get(productController.getProduct)
-    .patch(productController.updateProduct);
+router.route("/").post(cartController.createCart);
 
 module.exports = router;

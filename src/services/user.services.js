@@ -52,8 +52,8 @@ const getUsers = async (searchString, skip, take) => {
         take: parseInt(take),
         where: {
             OR: [
-                { email: { contains: searchString } },
-                { name: { contains: searchString } },
+                { email: { contains: searchString, mode: "insensitive" } },
+                { name: { contains: searchString, mode: "insensitive" } },
             ],
         },
         orderBy: {
