@@ -33,7 +33,12 @@ const updateProduct = async (productId, updateBody) => {
 };
 
 const getProductById = async (productId) => {
-    return await prisma.product.findUnique({ where: { id: productId } });
+    return await prisma.product.findUnique({
+        where: {
+            id: productId,
+        },
+        include: { Product_Inventory: true, Product_Category: true },
+    });
 };
 
 const getProducts = async (searchString, skip, take) => {
@@ -49,4 +54,59 @@ const getProducts = async (searchString, skip, take) => {
     });
 };
 
-module.exports = { createProduct, updateProduct, getProductById, getProducts };
+const consumeStock = async (productId, quantity) => {
+    return await prisma.product.update({
+        where: { id: productId },
+        data: {
+            Product_Inventory: {
+                update: {
+                    quantity: {
+                        decrement: quantity,
+                    },
+                },
+            },
+        },
+        select: {
+            id: true,
+            Product_Inventory: {
+                select: {
+                    id: true,
+                    quantity: true,
+                },
+            },
+        },
+    });
+};
+
+const replenishStock = async (productId, quantity) => {
+    return await prisma.product.update({
+        where: { id: productId },
+        data: {
+            Product_Inventory: {
+                update: {
+                    quantity: {
+                        increment: quantity,
+                    },
+                },
+            },
+        },
+        select: {
+            id: true,
+            Product_Inventory: {
+                select: {
+                    id: true,
+                    quantity: true,
+                },
+            },
+        },
+    });
+};
+
+module.exports = {
+    createProduct,
+    updateProduct,
+    getProductById,
+    getProducts,
+    consumeStock,
+    replenishStock,
+};
