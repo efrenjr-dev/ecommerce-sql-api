@@ -20,14 +20,11 @@ const loginUser = async (email, password) => {
     if (!user || isPasswordMatch) {
         throw new ApiError(
             httpStatus.UNAUTHORIZED,
-            "User email does exist or password is incorrect."
+            "User email does not exist or password is incorrect."
         );
     }
     if (!user.isActive) {
-        throw new ApiError(
-            httpStatus.UNAUTHORIZED,
-            "User is account is not active."
-        );
+        throw new ApiError(httpStatus.UNAUTHORIZED, "User account not active.");
     }
     if (!user.isEmailVerified) {
         const emailToken = await tokenService.generateEmailVerificationToken(
@@ -38,10 +35,7 @@ const loginUser = async (email, password) => {
             user.name,
             emailToken
         );
-        throw new ApiError(
-            httpStatus.UNAUTHORIZED,
-            "Your email has not been verified. Please check your email."
-        );
+        throw new ApiError(httpStatus.UNAUTHORIZED, "User email not verified.");
     }
     delete user.password;
     return user;

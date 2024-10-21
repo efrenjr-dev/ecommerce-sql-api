@@ -14,8 +14,11 @@ router
     .post(productController.createProduct);
 
 router
-    .route("/:productId")
+    .route("/product/:productId")
     .get(productController.getProduct)
     .patch(productController.updateProduct);
+
+router.patch("/consume", productController.consumeStock);
+router.patch("/replenish", productController.replenishStock);
 
 module.exports = router;

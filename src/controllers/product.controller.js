@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const logger = require("../config/logger");
 const catchAsync = require("../utils/catchAsync");
 const { productService } = require("../services");
+const { log } = require("winston");
 
 const createProduct = catchAsync(async (req, res) => {
     logger.debug("CREATE PRODUCT CONTROLLER");
@@ -21,7 +22,7 @@ const updateProduct = catchAsync(async (req, res) => {
 const getProduct = catchAsync(async (req, res) => {
     logger.debug("GET PRODUCT CONTROLLER");
     const product = await productService.getProductById(req.params.productId);
-    res.status(httpStatus.FOUND).send(product);
+    res.status(httpStatus.OK).send(product);
 });
 
 const getProducts = catchAsync(async (req, res) => {
@@ -31,7 +32,32 @@ const getProducts = catchAsync(async (req, res) => {
     if (!products) {
         throw new ApiError(httpStatus.NOT_FOUND, "No users found");
     }
-    res.status(httpStatus.FOUND).send(products);
+    res.status(httpStatus.OK).send(products);
 });
 
-module.exports = { createProduct, updateProduct, getProduct, getProducts };
+const consumeStock = catchAsync(async (req, res) => {
+    logger.debug("CONSUME STOCK CONTROLLER");
+    const productStock = await productService.consumeStock(
+        req.body.productId,
+        req.body.quantity
+    );
+    res.status(httpStatus.OK).send(productStock);
+});
+
+const replenishStock = catchAsync(async (req, res) => {
+    logger.debug("CONSUME STOCK CONTROLLER");
+    const productStock = await productService.replenishStock(
+        req.body.productId,
+        req.body.quantity
+    );
+    res.status(httpStatus.OK).send(productStock);
+});
+
+module.exports = {
+    createProduct,
+    updateProduct,
+    getProduct,
+    getProducts,
+    consumeStock,
+    replenishStock,
+};

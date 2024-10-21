@@ -15,14 +15,14 @@ model Cart_Item {
   createdAt        DateTime         @default(now()) @db.Timestamptz(6)
   sessionId        BigInt
   quantity         Int              @default(1) @db.SmallInt
-  productId        String           @db.Uuid @unique
+  productId        String           @db.Uuid
   Product          Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
   Shopping_Session Shopping_Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Order_Details {
-  id              BigInt          @id
+  id              BigInt          @id @unique @default(autoincrement())
   createdAt       DateTime        @default(now()) @db.Timestamptz(6)
   total           Float           @default(0) @db.Real
   paymentId       BigInt          @unique
@@ -45,14 +45,15 @@ model Order_Item {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Payment_Details {
-  id            BigInt         @id @unique @default(autoincrement())
-  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
-  phpAmount     Int
-  provider      String?        @db.VarChar
-  status        String         @db.VarChar
-  modifiedAt    DateTime       @default(now()) @db.Timestamptz(6)
-  orderId       BigInt
-  Order_Details Order_Details?
+  id                    BigInt         @id @unique @default(autoincrement())
+  createdAt             DateTime       @default(now()) @db.Timestamptz(6)
+  phpAmount             Int
+  provider              String         @db.VarChar
+  status                String         @db.VarChar
+  modifiedAt            DateTime       @default(now()) @db.Timestamptz(6)
+  orderId               BigInt?
+  providerTransactionId String         @unique(map: "Payment_Details_providerTransactionReference_key") @db.VarChar
+  Order_Details         Order_Details?
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
