@@ -13,7 +13,10 @@ router
     .get(auth(), cartController.getCart)
     .put(auth(), cartController.addToCart);
 
-router.delete("/item/:cartItemId", auth(), cartController.removeFromCart);
+router
+    .route("/item/:cartItemId")
+    .patch(auth(), cartController.updateCartItem)
+    .delete(auth(), cartController.removeFromCart);
 
 router.post("/checkout", auth(), cartController.checkout);
 

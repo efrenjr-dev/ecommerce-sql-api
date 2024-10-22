@@ -2,7 +2,6 @@ const httpStatus = require("http-status");
 const logger = require("../config/logger");
 const catchAsync = require("../utils/catchAsync");
 const { cartService } = require("../services");
-const { http } = require("winston");
 
 const addToCart = catchAsync(async (req, res) => {
     logger.debug("CREATE CART CONTROLLER");
@@ -12,8 +11,18 @@ const addToCart = catchAsync(async (req, res) => {
             "User role cannot have shopping cart."
         );
     }
-    const updatedCart = await cartService.addToCart(req.user.id, req.body);
-    res.status(httpStatus.OK).send(updatedCart);
+    const cart = await cartService.addToCart(req.user.id, req.body);
+    res.status(httpStatus.OK).send(cart);
+});
+
+const updateCartItem = catchAsync(async (req, res) => {
+    logger.debug("CART ITEM CONTROLLER");
+    const updateCartItem = await cartService.updateCartItem(
+        req.user.id,
+        req.params.cartItemId,
+        req.body
+    );
+    res.status(httpStatus.OK).send(updateCartItem);
 });
 
 const getCart = catchAsync(async (req, res) => {
@@ -44,4 +53,10 @@ const checkout = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).send(order);
 });
 
-module.exports = { addToCart, getCart, removeFromCart, checkout };
+module.exports = {
+    addToCart,
+    updateCartItem,
+    getCart,
+    removeFromCart,
+    checkout,
+};
