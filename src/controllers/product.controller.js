@@ -2,7 +2,6 @@ const httpStatus = require("http-status");
 const logger = require("../config/logger");
 const catchAsync = require("../utils/catchAsync");
 const { productService } = require("../services");
-const { log } = require("winston");
 
 const createProduct = catchAsync(async (req, res) => {
     logger.debug("CREATE PRODUCT CONTROLLER");

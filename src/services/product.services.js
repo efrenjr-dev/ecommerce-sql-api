@@ -2,7 +2,6 @@ const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const { prisma, xprisma } = require("../utils/prisma");
 const logger = require("../config/logger");
-const { createUser } = require("./user.services");
 
 const createProduct = async (productBody) => {
     logger.debug(productBody.name);
