@@ -32,7 +32,8 @@ const addToCart = async (userId, updateBody) => {
 
             cart.Cart_Item.forEach((cartItem) => {
                 if (cartItem.id === foundCartItem.id) {
-                    cartTotal += updateBody.quantity * cartItem.Product.price;
+                    cartTotal +=
+                        updatedCartItem.quantity * cartItem.Product.price;
                 } else {
                     cartTotal += cartItem.quantity * cartItem.Product.price;
                 }
@@ -55,7 +56,6 @@ const addToCart = async (userId, updateBody) => {
                 select: {
                     id: true,
                     quantity: true,
-                    Product: { select: { price: true } },
                 },
             });
 
@@ -82,6 +82,7 @@ const addToCart = async (userId, updateBody) => {
 
 const updateCartItem = async (userId, cartItemId, updateBody) => {
     return prisma.$transaction(async (tx) => {
+        let cartTotal = 0;
         const updatedCartItem = await prisma.cart_Item.update({
             where: { id: cartItemId },
             data: { ...updateBody },
@@ -111,7 +112,6 @@ const updateCartItem = async (userId, cartItemId, updateBody) => {
             },
         });
 
-        let cartTotal = 0;
         updatedCart.Cart_Item.forEach((cartItem) => {
             cartTotal += cartItem.quantity * cartItem.Product.price;
         });
@@ -131,7 +131,7 @@ const updateCartItem = async (userId, cartItemId, updateBody) => {
 };
 
 const removeFromCart = async (userId, cartItemId) => {
-    let total = 0;
+    let cartTotal = 0;
 
     return prisma.$transaction(async (tx) => {
         const deleteCartItemOperation = tx.cart_Item.delete({
@@ -155,13 +155,13 @@ const removeFromCart = async (userId, cartItemId) => {
         });
 
         getUpdatedCart.Cart_Item.forEach((cartItem) => {
-            total += cartItem.quantity * cartItem.Product.price;
+            cartTotal += cartItem.quantity * cartItem.Product.price;
         });
 
         await tx.shopping_Session.update({
             where: { userId: userId },
             data: {
-                total: total,
+                total: cartTotal,
             },
             select: {
                 total: true,
@@ -200,7 +200,17 @@ const getCart = async (userId) => {
 };
 
 const checkout = async (userId, body) => {
+    let orderItems = [];
+
     const cart = await getCart(userId);
+
+    for (cartItem of cart.Cart_Item) {
+        orderItems.push({
+            quantity: cartItem.quantity,
+            productId: cartItem.Product.id,
+        });
+    }
+
     return prisma.$transaction(async (tx) => {
         for (cartItem of cart.Cart_Item) {
             await tx.product.update({
@@ -217,6 +227,7 @@ const checkout = async (userId, body) => {
             });
         }
 
+        //mock successful payment
         const paymentDetails = await tx.payment_Details.create({
             data: {
                 phpAmount: cart.total,
@@ -232,22 +243,10 @@ const checkout = async (userId, body) => {
                 paymentDetails.status
             )
         ) {
-            for (cartItem of cart.Cart_Item) {
-                await tx.productService.replenishStock(
-                    cartItem.Product.id,
-                    cartItem.quantity
-                );
-            }
+            //if payment fails, prisma automatically rollsback transaction
             throw new ApiError(httpStatus.PAYMENT_REQUIRED, "Payment failed.");
         }
 
-        let orderItems = [];
-        for (cartItem of cart.Cart_Item) {
-            orderItems.push({
-                quantity: cartItem.quantity,
-                productId: cartItem.Product.id,
-            });
-        }
         const orderDetails = await tx.order_Details.create({
             data: {
                 total: cart.total,
