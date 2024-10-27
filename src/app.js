@@ -1,22 +1,21 @@
 const express = require("express");
-const morgan = require("./config/morgan");
 const cors = require("cors");
 const helmet = require("helmet");
-const httpStatus = require("http-status");
+const morgan = require("./config/morgan");
+const { authLimiter } = require("./middlewares/rateLimiter");
+const { slowLimit } = require("./middlewares/slowDown");
+const passport = require("passport");
+const { passportJwtStrategy } = require("./config/passport");
+const cookieParser = require("cookie-parser");
 const { xss } = require("express-xss-sanitizer");
 const mongoSanitize = require("express-mongo-sanitize");
 const compression = require("compression");
-const cookieParser = require("cookie-parser");
-const passport = require("passport");
 const superjson = require("superjson");
-
+const config = require("./config/config");
+const httpStatus = require("http-status");
 const ApiError = require("./utils/ApiError");
 const { errorConverter, errorHandler } = require("./middlewares/error");
-const config = require("./config/config");
-const { authLimiter } = require("./middlewares/rateLimiter");
-const { slowLimit } = require("./middlewares/slowDown");
 const routes = require("./routes/v1/");
-const { passportJwtStrategy } = require("./config/passport");
 
 const app = express();
 
@@ -25,35 +24,51 @@ if (config.env !== "test") {
     app.use(morgan.errorHandler);
 }
 
+// Security middleware
+app.use(helmet());
+app.use(xss());
+app.use(mongoSanitize());
+app.use(compression());
+
+// CORS middleware
+app.use(cors());
+app.options("*", cors());
+
+// Rate limiting middleware
 if (config.env === "production") {
     app.use(rateLimiter);
     app.use(slowLimit);
 }
 
-app.use(helmet());
-app.use(express.json());
+// Body parsing middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(xss());
-app.use(mongoSanitize());
-app.use(compression());
 
-app.use(cors());
-app.options("*", cors());
-
-passport.use(passportJwtStrategy);
-
-if (config.env === "production") {
-    app.use("/v1/auth", authLimiter);
-    // app.use("/v1", slowLimit);
-}
-
-// Middleware to parse incoming JSON with SuperJSON
-app.use(
-    express.json({
-        reviver: (key, value) => superjson.parse(value),
-    })
-);
+// app.use(express.json());
+// Custom middleware to handle SuperJSON deserialization
+app.use((req, res, next) => {
+    if (req.is("application/json")) {
+        let data = "";
+        req.on("data", (chunk) => {
+            data += chunk;
+        });
+        req.on("end", () => {
+            try {
+                const parsedData = JSON.parse(data);
+                if (parsedData.hasOwnProperty("json")) {
+                    req.body = superjson.deserialize(parsedData);
+                } else {
+                    req.body = parsedData;
+                }
+                next();
+            } catch (err) {
+                next(err);
+            }
+        });
+    } else {
+        next();
+    }
+});
 
 // Middleware to serialize outgoing JSON with SuperJSON
 app.use((req, res, next) => {
@@ -66,6 +81,14 @@ app.use((req, res, next) => {
     };
     next();
 });
+
+// Passport middleware
+passport.use(passportJwtStrategy);
+
+if (config.env === "production") {
+    app.use("/v1/auth", authLimiter);
+    // app.use("/v1", slowLimit);
+}
 
 app.use("/v1", routes);
 
