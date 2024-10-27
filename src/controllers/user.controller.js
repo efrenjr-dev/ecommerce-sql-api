@@ -21,6 +21,16 @@ const getUser = catchAsync(async (req, res) => {
     res.status(httpStatus.FOUND).send(user);
 });
 
+const getUserDetails = catchAsync(async (req, res) => {
+    logger.debug("GET USER");
+    const user = await userService.getUserById(req.user.id);
+    delete user.password;
+    if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    }
+    res.status(httpStatus.FOUND).send(user);
+});
+
 const getUsers = catchAsync(async (req, res) => {
     logger.debug("GET ALL USERS");
     const { searchString, skip, take } = req.query;
@@ -43,4 +53,10 @@ const updateUser = catchAsync(async (req, res) => {
     res.status(httpStatus.ACCEPTED).send(user);
 });
 
-module.exports = { createUser, getUser, getUsers: getUsers, updateUser };
+module.exports = {
+    createUser,
+    getUser,
+    getUsers,
+    updateUser,
+    getUserDetails,
+};

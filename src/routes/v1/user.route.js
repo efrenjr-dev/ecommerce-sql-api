@@ -10,7 +10,7 @@ const router = express.Router();
 
 router
     .route("/")
-    .get(auth("getUsers"), userController.getUsers)
+    .get(auth(), userController.getUserDetails)
     .post(
         auth("manageUsers"),
         validator.body(userValidation.createUser),
@@ -30,5 +30,7 @@ router
         validator.body(userValidation.updateUser),
         userController.updateUser
     );
+
+router.route("/all").get(auth("getUsers"), userController.getUsers);
 
 module.exports = router;
