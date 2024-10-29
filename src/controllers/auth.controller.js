@@ -20,7 +20,10 @@ const login = catchAsync(async (req, res) => {
     const { email, password } = req.body;
     const user = await authService.loginUser(email, password);
     const tokens = await tokenService.generateAuthTokens(user);
-    res.status(httpStatus.OK).send({ user, tokens });
+    res.status(httpStatus.OK)
+        .cookie("accessToken", tokens.access.token)
+        .cookie("refreshToken", tokens.refresh.token)
+        .send({ user });
 });
 
 const refreshTokens = catchAsync(async (req, res) => {
