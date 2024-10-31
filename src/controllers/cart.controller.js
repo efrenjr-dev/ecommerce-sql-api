@@ -12,17 +12,20 @@ const addToCart = catchAsync(async (req, res) => {
         );
     }
     const cart = await cartService.addToCart(req.user.id, req.body);
-    res.status(httpStatus.OK).send(cart);
+    res.status(httpStatus.OK).send({
+        message: "Item has been added to cart",
+        cart,
+    });
 });
 
 const updateCartItem = catchAsync(async (req, res) => {
     logger.debug("CART ITEM CONTROLLER");
-    const updateCartItem = await cartService.updateCartItem(
+    const updatedCart = await cartService.updateCartItem(
         req.user.id,
         req.params.cartItemId,
         req.body
     );
-    res.status(httpStatus.OK).send(updateCartItem);
+    res.status(httpStatus.OK).send(updatedCart);
 });
 
 const getCart = catchAsync(async (req, res) => {
@@ -50,7 +53,10 @@ const checkout = catchAsync(async (req, res) => {
     logger.debug("CHECKOUT CONTROLLER");
     const mockBody = { provider: "BISA" };
     const order = await cartService.checkout(req.user.id, mockBody);
-    res.status(httpStatus.OK).send(order);
+    res.status(httpStatus.OK).send({
+        message: "Cart has been checked out",
+        order,
+    });
 });
 
 module.exports = {

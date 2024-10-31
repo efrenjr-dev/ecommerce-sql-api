@@ -35,7 +35,10 @@ const loginUser = async (email, password) => {
             user.name,
             emailToken
         );
-        throw new ApiError(httpStatus.UNAUTHORIZED, "User email not verified.");
+        throw new ApiError(
+            httpStatus.UNAUTHORIZED,
+            `Email is unverified. Please check your email (${email}) to verify.`
+        );
     }
     delete user.password;
     return user;

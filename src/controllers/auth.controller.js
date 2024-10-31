@@ -11,8 +11,12 @@ const catchAsync = require("../utils/catchAsync");
 const register = catchAsync(async (req, res) => {
     logger.debug("REGISTER USER");
     const user = await userService.createUser(req.body);
-    const tokens = await tokenService.generateAuthTokens(user);
-    res.status(httpStatus.CREATED).send({ user, tokens });
+    const emailToken = await tokenService.generateEmailVerificationToken(user);
+    await emailService.sendVerificationEmail(user.email, user.name, emailToken);
+    res.status(httpStatus.CREATED).send({
+        message: "User has been registered.",
+        user,
+    });
 });
 
 const login = catchAsync(async (req, res) => {
@@ -60,16 +64,20 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
     res.status(httpStatus.NO_CONTENT).send();
 });
 
-const verifyEmail = catchAsync(async (req, res) => {
+const verifyEmail = catchAsync(async (req, res) => { 
     logger.debug("VERIFY EMAIL");
     await authService.verifyEmail(req.query.token);
-    res.status(httpStatus.ACCEPTED).send("Email has been verified.");
+    res.status(httpStatus.ACCEPTED).send({
+        message: "Email has been verified.",
+    });
 });
 
 const resetPassword = catchAsync(async (req, res) => {
     logger.debug("RESET PASSWORD");
     await authService.resetPassword(req.query.token, req.body.password);
-    res.status(httpStatus.ACCEPTED).send("Password has been reset.");
+    res.status(httpStatus.ACCEPTED).send({
+        message: "Password has been reset.",
+    });
 });
 
 module.exports = {

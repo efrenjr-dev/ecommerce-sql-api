@@ -56,6 +56,9 @@ const addToCart = async (userId, updateBody) => {
                 select: {
                     id: true,
                     quantity: true,
+                    Product: {
+                        select: { price: true },
+                    },
                 },
             });
 
@@ -83,7 +86,7 @@ const addToCart = async (userId, updateBody) => {
 const updateCartItem = async (userId, cartItemId, updateBody) => {
     return prisma.$transaction(async (tx) => {
         let cartTotal = 0;
-        const updatedCartItem = await prisma.cart_Item.update({
+        await prisma.cart_Item.update({
             where: { id: cartItemId },
             data: { ...updateBody },
             select: {
@@ -96,21 +99,8 @@ const updateCartItem = async (userId, cartItemId, updateBody) => {
             },
         });
 
-        const updatedCart = await tx.shopping_Session.findUnique({
-            where: { userId: userId },
-            select: {
-                Cart_Item: {
-                    select: {
-                        quantity: true,
-                        Product: {
-                            select: {
-                                price: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
+        const updatedCart = await getCart(userId);
+        delete updatedCart.total;
 
         updatedCart.Cart_Item.forEach((cartItem) => {
             cartTotal += cartItem.quantity * cartItem.Product.price;
@@ -126,7 +116,7 @@ const updateCartItem = async (userId, cartItemId, updateBody) => {
             },
         });
 
-        return { cartTotal, updatedCartItem };
+        return { updatedCart };
     });
 };
 
@@ -179,6 +169,7 @@ const getCart = async (userId) => {
             id: true,
             total: true,
             Cart_Item: {
+                orderBy: { id: "asc" },
                 select: {
                     id: true,
                     quantity: true,
@@ -188,7 +179,6 @@ const getCart = async (userId) => {
                             name: true,
                             price: true,
                             description: true,
-                            inventoryId: true,
                         },
                     },
                 },
