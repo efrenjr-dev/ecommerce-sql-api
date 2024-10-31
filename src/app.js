@@ -35,7 +35,7 @@ app.use(mongoSanitize());
 app.use(compression());
 
 // CORS middleware
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: config.appUrl, credentials: true }));
 // app.options("*", cors());
 
 // Rate limiting middleware

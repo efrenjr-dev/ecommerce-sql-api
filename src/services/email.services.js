@@ -27,7 +27,7 @@ const sendEmail = async (to, subject, text) => {
  */
 const sendVerificationEmail = async (to, name, token) => {
     const subject = "Email Verification Link";
-    const link = `http://localhost:3000/v1/auth/verify-email?token=${token}`;
+    const link = `${config.appUrl}/verify-email/${token}`;
     const text = `Dear ${name},
     To verify your email, please click on the link ${link}`;
     await sendEmail(to, subject, text);
@@ -35,7 +35,7 @@ const sendVerificationEmail = async (to, name, token) => {
 
 const sendResetPasswordEmail = async (to, token) => {
     const subject = "Reset Password";
-    const link = `http://localhost:3000/v1/auth/reset-password?token=${token}`;
+    const link = `${config.appUrl}/reset-password/${token}`;
     const text = `Dear,
     To reset password for user ${to}, please click on the link ${link}`;
     await sendEmail(to, subject, text);

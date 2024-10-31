@@ -9,6 +9,7 @@ const environmentVariablesSchema = Joi.object()
             .valid("production", "development", "test")
             .required(),
         PORT: Joi.number().default(3000),
+        APP_URL: Joi.string().uri().required(),
         SALT: Joi.number().required(),
         ACCESS_TOKEN_SECRET: Joi.string()
             .required()
@@ -75,6 +76,7 @@ if (error) {
 module.exports = {
     env: environmentVariables.NODE_ENV,
     port: environmentVariables.PORT,
+    appUrl: environmentVariables.APP_URL,
     salt: environmentVariables.SALT,
     jwt: {
         accessTokenSecret: environmentVariables.ACCESS_TOKEN_SECRET,
