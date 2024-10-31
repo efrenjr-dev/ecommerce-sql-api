@@ -99,8 +99,27 @@ const updateCartItem = async (userId, cartItemId, updateBody) => {
             },
         });
 
-        const updatedCart = await getCart(userId);
-        delete updatedCart.total;
+        const updatedCart = await tx.shopping_Session.findUnique({
+            where: { userId: userId },
+            select: {
+                id: true,
+                Cart_Item: {
+                    orderBy: { id: "asc" },
+                    select: {
+                        id: true,
+                        quantity: true,
+                        Product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                price: true,
+                                description: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
 
         updatedCart.Cart_Item.forEach((cartItem) => {
             cartTotal += cartItem.quantity * cartItem.Product.price;
@@ -116,27 +135,33 @@ const updateCartItem = async (userId, cartItemId, updateBody) => {
             },
         });
 
-        return { updatedCart };
+        return { cartTotal, updatedCart };
     });
 };
 
 const removeFromCart = async (userId, cartItemId) => {
     let cartTotal = 0;
-
+    logger.debug(cartItemId);
     return prisma.$transaction(async (tx) => {
-        const deleteCartItemOperation = tx.cart_Item.delete({
+        await tx.cart_Item.delete({
             where: { id: cartItemId },
         });
 
-        const getUpdatedCart = await tx.shopping_Session.findUnique({
+        const updatedCart = await tx.shopping_Session.findUnique({
             where: { userId: userId },
             select: {
+                id: true,
                 Cart_Item: {
+                    orderBy: { id: "asc" },
                     select: {
+                        id: true,
                         quantity: true,
                         Product: {
                             select: {
+                                id: true,
+                                name: true,
                                 price: true,
+                                description: true,
                             },
                         },
                     },
@@ -144,9 +169,11 @@ const removeFromCart = async (userId, cartItemId) => {
             },
         });
 
-        getUpdatedCart.Cart_Item.forEach((cartItem) => {
-            cartTotal += cartItem.quantity * cartItem.Product.price;
-        });
+        if (updatedCart.hasOwnProperty("Cart_Item")) {
+            updatedCart.Cart_Item.forEach((cartItem) => {
+                cartTotal += cartItem.quantity * cartItem.Product.price;
+            });
+        }
 
         await tx.shopping_Session.update({
             where: { userId: userId },
@@ -158,7 +185,7 @@ const removeFromCart = async (userId, cartItemId) => {
             },
         });
 
-        return deleteCartItemOperation;
+        return { cartTotal, updatedCart };
     });
 };
 
