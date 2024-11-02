@@ -5,12 +5,14 @@ const {
     tokenService,
     userService,
     emailService,
+    cartService,
 } = require("../services");
 const catchAsync = require("../utils/catchAsync");
 
 const register = catchAsync(async (req, res) => {
     logger.debug("REGISTER USER");
     const user = await userService.createUser(req.body);
+    await cartService.createCart(user.id);
     const emailToken = await tokenService.generateEmailVerificationToken(user);
     await emailService.sendVerificationEmail(user.email, user.name, emailToken);
     res.status(httpStatus.CREATED).send({
@@ -64,7 +66,7 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
     res.status(httpStatus.NO_CONTENT).send();
 });
 
-const verifyEmail = catchAsync(async (req, res) => { 
+const verifyEmail = catchAsync(async (req, res) => {
     logger.debug("VERIFY EMAIL");
     await authService.verifyEmail(req.query.token);
     res.status(httpStatus.ACCEPTED).send({

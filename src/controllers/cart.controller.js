@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const logger = require("../config/logger");
 const catchAsync = require("../utils/catchAsync");
 const { cartService } = require("../services");
+const ApiError = require("../utils/ApiError");
 
 const addToCart = catchAsync(async (req, res) => {
     logger.debug("CREATE CART CONTROLLER");
