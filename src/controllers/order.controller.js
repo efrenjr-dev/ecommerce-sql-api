@@ -11,7 +11,7 @@ const getOrderDetails = catchAsync(async (req, res) => {
 
 const getOrders = catchAsync(async (req, res) => {
     logger.debug("GET ORDER DETAILS CONTROLLER");
-    const orders = await orderService.getOrders(req.user);
+    const orders = await orderService.getOrders(req.user.id);
     res.status(httpStatus.OK).send(orders);
 });
 

@@ -27,8 +27,12 @@ const login = catchAsync(async (req, res) => {
     const user = await authService.loginUser(email, password);
     const tokens = await tokenService.generateAuthTokens(user);
     res.status(httpStatus.OK)
-        .cookie("accessToken", tokens.access.token)
-        .cookie("refreshToken", tokens.refresh.token)
+        .cookie("accessToken", tokens.access.token, {
+            expires: tokens.access.expires,
+        })
+        .cookie("refreshToken", tokens.refresh.token, {
+            expires: tokens.refresh.expires,
+        })
         .send({ user });
 });
 
@@ -36,7 +40,14 @@ const refreshTokens = catchAsync(async (req, res) => {
     logger.debug("REFRESH AUTH TOKENS");
     const { refreshToken } = req.body;
     const tokens = await authService.refreshAuth(refreshToken);
-    res.status(httpStatus.OK).send({ ...tokens });
+    res.status(httpStatus.OK)
+        .cookie("accessToken", tokens.access.token, {
+            expires: tokens.access.expires,
+        })
+        .cookie("refreshToken", tokens.refresh.token, {
+            expires: tokens.refresh.expires,
+        })
+        .send({ message: "Refreshed tokens" });
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
