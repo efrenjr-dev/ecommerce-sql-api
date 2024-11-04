@@ -29,7 +29,8 @@ const sendVerificationEmail = async (to, name, token) => {
     const subject = "Email Verification Link";
     const link = `${config.appUrl}/verify-email/${token}`;
     const text = `Dear ${name},
-    To verify your email, please click on the link ${link}`;
+    To verify your email, please visit the link ${link}
+    Link expires in ${config.jwt.emailExpirationMinutes} minutes.`;
     await sendEmail(to, subject, text);
 };
 
@@ -37,7 +38,8 @@ const sendResetPasswordEmail = async (to, token) => {
     const subject = "Reset Password";
     const link = `${config.appUrl}/reset-password/${token}`;
     const text = `Dear,
-    To reset password for user ${to}, please click on the link ${link}`;
+    To reset password for user ${to}, please visit the link ${link}
+    Link expires in ${config.jwt.resetPasswordExpirationMinutes} minutes.`;
     await sendEmail(to, subject, text);
 };
 

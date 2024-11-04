@@ -16,8 +16,14 @@ const emailService = require("./email.services");
  */
 const loginUser = async (email, password) => {
     const user = await userService.getUserByEmail(email);
+    if (!user) {
+        throw new ApiError(
+            httpStatus.UNAUTHORIZED,
+            "User email does not exist or password is incorrect."
+        );
+    }
     const isPasswordMatch = await bcrypt.compare(user.password, password);
-    if (!user || isPasswordMatch) {
+    if (isPasswordMatch) {
         throw new ApiError(
             httpStatus.UNAUTHORIZED,
             "User email does not exist or password is incorrect."
