@@ -36,6 +36,13 @@ const login = catchAsync(async (req, res) => {
         .send({ user });
 });
 
+const logout = catchAsync(async (req, res) => {
+    logger.debug("LOGOUT USER");
+    logger.debug(req.query.token);
+    await tokenService.blacklistToken(req.query.token);
+    res.status(httpStatus.NO_CONTENT).send();
+});
+
 const refreshTokens = catchAsync(async (req, res) => {
     logger.debug("REFRESH AUTH TOKENS");
     const { refreshToken } = req.body;
@@ -96,6 +103,7 @@ const resetPassword = catchAsync(async (req, res) => {
 module.exports = {
     register,
     login,
+    logout,
     refreshTokens,
     sendVerificationEmail,
     verifyEmail,

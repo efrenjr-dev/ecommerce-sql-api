@@ -62,6 +62,7 @@ const blacklistToken = async (token) => {
         where: { token: hashedToken, blacklisted: false },
         data: { blacklisted: true },
     });
+    logger.debug(Object.entries(tokenUpdate));
     return !!tokenUpdate;
 };
 

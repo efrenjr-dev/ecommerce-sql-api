@@ -8,7 +8,8 @@ const validator = require("express-joi-validation").createValidator({
 
 const router = express.Router();
 
-router.route("/:orderId").get(auth(),orderController.getOrderDetails);
-router.route("/").get(auth(),orderController.getOrders);
+router.route("/all").get(auth("getOrders"), orderController.getAllOrders);
+router.route("/").get(auth(), orderController.getOrders);
+router.route("/order/:orderId").get(auth(), orderController.getOrderDetails);
 
 module.exports = router;

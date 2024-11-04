@@ -19,6 +19,9 @@ router.post(
     validator.body(authValidation.login),
     authController.login
 );
+
+router.post("/logout", authController.logout);
+
 router.post("/refresh", authController.refreshTokens);
 
 router.post(

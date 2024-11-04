@@ -11,12 +11,12 @@ const router = express.Router();
 router
     .route("/")
     .get(productController.getProducts)
-    .post(productController.createProduct);
+    .post(auth("manageProducts"), productController.createProduct);
 
 router
     .route("/product/:productId")
     .get(productController.getProduct)
-    .patch(productController.updateProduct);
+    .patch(auth("manageProducts"), productController.updateProduct);
 
 router.patch("/consume", productController.consumeStock);
 router.patch("/replenish", productController.replenishStock);

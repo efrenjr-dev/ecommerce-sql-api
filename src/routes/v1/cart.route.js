@@ -11,13 +11,13 @@ const router = express.Router();
 router
     .route("/")
     .get(auth(), cartController.getCart)
-    .put(auth(), cartController.addToCart);
+    .put(auth("manageCart"), cartController.addToCart);
 
 router
     .route("/item/:cartItemId")
-    .patch(auth(), cartController.updateCartItem)
-    .delete(auth(), cartController.removeFromCart);
+    .patch(auth("manageCart"), cartController.updateCartItem)
+    .delete(auth("manageCart"), cartController.removeFromCart);
 
-router.post("/checkout", auth(), cartController.checkout);
+router.post("/checkout", auth("manageCart"), cartController.checkout);
 
 module.exports = router;
