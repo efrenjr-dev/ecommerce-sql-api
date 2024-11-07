@@ -10,7 +10,7 @@ const router = express.Router();
 
 router
     .route("/")
-    .get(productController.         )
+    .get(productController.getProducts)
     .post(auth("manageProducts"), productController.createProduct);
 
 router
