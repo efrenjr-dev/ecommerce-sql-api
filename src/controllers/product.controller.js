@@ -29,7 +29,17 @@ const getProducts = catchAsync(async (req, res) => {
     const { searchString, skip, take } = req.query;
     const products = await productService.getProducts(searchString, skip, take);
     if (!products) {
-        throw new ApiError(httpStatus.NOT_FOUND, "No users found");
+        throw new ApiError(httpStatus.NOT_FOUND, "No product found");
+    }
+    res.status(httpStatus.OK).send(products);
+});
+
+const getAllProducts = catchAsync(async (req, res) => {
+    logger.debug("GET ALL PRODUCTS");
+    const { searchString, skip, take } = req.query;
+    const products = await productService.getAllProducts(searchString, skip, take);
+    if (!products) {
+        throw new ApiError(httpStatus.NOT_FOUND, "No product found");
     }
     res.status(httpStatus.OK).send(products);
 });
@@ -57,6 +67,7 @@ module.exports = {
     updateProduct,
     getProduct,
     getProducts,
+    getAllProducts,
     consumeStock,
     replenishStock,
 };

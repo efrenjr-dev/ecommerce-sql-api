@@ -230,6 +230,24 @@ const checkout = async (userId, body) => {
 
     return prisma.$transaction(async (tx) => {
         for (cartItem of cart.Cart_Item) {
+            const stock = await tx.product.findUnique({
+                where: { id: cartItem.Product.id },
+                select: {
+                    id: true,
+                    name: true,
+                    Product_Inventory: {
+                        select: {
+                            quantity: true,
+                        },
+                    },
+                },
+            });
+            if (cartItem.quantity > stock.Product_Inventory.quantity) {
+                throw new ApiError(
+                    httpStatus.NOT_ACCEPTABLE,
+                    `Unable to proceed. Quantity cannot be more than (${stock.Product_Inventory.quantity}) for item (${stock.name})`
+                );
+            }
             await tx.product.update({
                 where: { id: cartItem.Product.id },
                 data: {

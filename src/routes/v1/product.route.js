@@ -10,7 +10,7 @@ const router = express.Router();
 
 router
     .route("/")
-    .get(productController.getProducts)
+    .get(productController.         )
     .post(auth("manageProducts"), productController.createProduct);
 
 router
@@ -18,6 +18,7 @@ router
     .get(productController.getProduct)
     .patch(auth("manageProducts"), productController.updateProduct);
 
+router.get("/all", auth("getProducts"), productController.getAllProducts);
 router.patch("/consume", productController.consumeStock);
 router.patch("/replenish", productController.replenishStock);
 

@@ -46,14 +46,61 @@ const getProducts = async (searchString, skip, take) => {
         take: parseInt(take),
         where: {
             OR: [{ name: { contains: searchString, mode: "insensitive" } }],
+            Product_Inventory: { quantity: { gt: 0 } },
         },
         orderBy: {
             name: "asc",
+        },
+        include: {
+            Product_Inventory: {
+                select: {
+                    quantity: true,
+                },
+            },
+        },
+    });
+};
+
+const getAllProducts = async (searchString, skip, take) => {
+    return prisma.product.findMany({
+        skip: parseInt(skip),
+        take: parseInt(take),
+        where: {
+            OR: [{ name: { contains: searchString, mode: "insensitive" } }],
+        },
+        orderBy: {
+            name: "asc",
+        },
+        include: {
+            Product_Inventory: {
+                select: {
+                    quantity: true,
+                },
+            },
         },
     });
 };
 
 const consumeStock = async (productId, quantity) => {
+    const stock = await prisma.product.findUnique({
+        where: { id: productId },
+        select: {
+            id: true,
+            name: true,
+            Product_Inventory: {
+                select: {
+                    id: true,
+                    quantity: true,
+                },
+            },
+        },
+    });
+    if (quantity > stock.Product_Inventory.quantity) {
+        return new ApiError(
+            httpStatus.NOT_ACCEPTABLE,
+            `Unable to proceed. Item (${stock.name}) has only (${stock.Product_Inventory.quantity}) remaining in stock.`
+        );
+    }
     return await prisma.product.update({
         where: { id: productId },
         data: {
@@ -106,6 +153,7 @@ module.exports = {
     updateProduct,
     getProductById,
     getProducts,
+    getAllProducts,
     consumeStock,
     replenishStock,
 };
