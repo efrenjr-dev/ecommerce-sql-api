@@ -36,7 +36,19 @@ app.use(mongoSanitize());
 app.use(compression());
 
 // CORS middleware
-app.use(cors({ origin: config.appUrl, credentials: true }));
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Check if the origin is in the allowedOrigins list or if the origin is null (e.g., for non-browser requests)
+            if (config.appUrl.includes(origin) || !origin) {
+                callback(null, true); // Allow the origin
+            } else {
+                callback(new Error("Not allowed by CORS"), false); // Reject the origin
+            }
+        },
+        credentials: true,
+    })
+);
 // app.options("*", cors());
 
 // Rate limiting middleware

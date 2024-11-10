@@ -9,7 +9,10 @@ const environmentVariablesSchema = Joi.object()
             .valid("production", "development", "test")
             .required(),
         PORT: Joi.number().default(3000),
-        APP_URL: Joi.string().uri().required(),
+        APP_URL: Joi.array()
+            .items(Joi.string().uri().required()) // Validate each URL as a valid URI
+            .min(1) // Ensure at least one URL is provided
+            .required(),
         SALT: Joi.number().required(),
         ACCESS_TOKEN_SECRET: Joi.string()
             .required()
@@ -66,8 +69,13 @@ const environmentVariablesSchema = Joi.object()
     .prefs({ errors: { label: "key" } })
     .unknown();
 
+const config = {
+    ...process.env,
+    APP_URL: process.env.APP_URL ? process.env.APP_URL.split(",") : [], // Split into an array if APP_URL exists
+};
+
 const { value: environmentVariables, error } =
-    environmentVariablesSchema.validate(process.env);
+    environmentVariablesSchema.validate(config);
 
 if (error) {
     throw new Error(`Config validation error: ${error.message}`);
