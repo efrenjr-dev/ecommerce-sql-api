@@ -29,9 +29,13 @@ const login = catchAsync(async (req, res) => {
     res.status(httpStatus.OK)
         .cookie("accessToken", tokens.access.token, {
             expires: tokens.access.expires,
+            secure: true,
+            sameSite: "None",
         })
         .cookie("refreshToken", tokens.refresh.token, {
             expires: tokens.refresh.expires,
+            secure: true,
+            sameSite: "None",
         })
         .send({ user });
 });
@@ -50,9 +54,13 @@ const refreshTokens = catchAsync(async (req, res) => {
     res.status(httpStatus.OK)
         .cookie("accessToken", tokens.access.token, {
             expires: tokens.access.expires,
+            secure: true,
+            sameSite: "None",
         })
         .cookie("refreshToken", tokens.refresh.token, {
             expires: tokens.refresh.expires,
+            secure: true,
+            sameSite: "None",
         })
         .send({ message: "Refreshed tokens" });
 });
