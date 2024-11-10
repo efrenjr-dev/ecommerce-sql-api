@@ -14,8 +14,9 @@ const createUser = Joi.object({
 
 const paramsUserId = Joi.object({
     userId: Joi.string()
+        .guid({ version: ["uuidv4"] })
         .required()
-        .regex(/^[0-9a-fA-F]{24}$/, "object Id"),
+        .label("Supabase UUID"),
 });
 
 const updateUser = Joi.object({

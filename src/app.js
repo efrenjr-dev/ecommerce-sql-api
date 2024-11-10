@@ -20,6 +20,7 @@ const {
     deserializeSuperJson,
     serializeSuperJson,
 } = require("./middlewares/superjson");
+const { auth } = require("./middlewares/auth");
 
 const app = express();
 
@@ -40,7 +41,7 @@ app.use(cors({ origin: config.appUrl, credentials: true }));
 
 // Rate limiting middleware
 if (config.env === "production") {
-    app.use(rateLimiter);
+    app.use(authLimiter);
     app.use(slowLimit);
 }
 

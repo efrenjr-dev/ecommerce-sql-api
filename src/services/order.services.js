@@ -25,6 +25,9 @@ const getOrders = async (userId, skip, take) => {
         where: { userId: userId },
         skip: parseInt(skip),
         take: parseInt(take),
+        orderBy: {
+            createdAt: "desc",
+        },
     });
 };
 

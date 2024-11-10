@@ -1,7 +1,7 @@
 const express = require("express");
 const { auth } = require("../../middlewares/auth");
 const { productController } = require("../../controllers/");
-const { userValidation } = require("../../validations");
+const { productValidation } = require("../../validations");
 const validator = require("express-joi-validation").createValidator({
     passError: true,
 });
@@ -11,15 +11,34 @@ const router = express.Router();
 router
     .route("/")
     .get(productController.getProducts)
-    .post(auth("manageProducts"), productController.createProduct);
+    .post(
+        auth("manageProducts"),
+        validator.body(productValidation.createProduct),
+        productController.createProduct
+    );
 
 router
     .route("/product/:productId")
     .get(productController.getProduct)
-    .patch(auth("manageProducts"), productController.updateProduct);
+    .patch(
+        auth("manageProducts"),
+        validator.body(productValidation),
+        productController.updateProduct
+    );
 
 router.get("/all", auth("getProducts"), productController.getAllProducts);
-router.patch("/consume", productController.consumeStock);
-router.patch("/replenish", productController.replenishStock);
+
+router.patch(
+    "/consume",
+    auth("manageInventory"),
+    validator.body(productValidation.updateStock),
+    productController.consumeStock
+);
+router.patch(
+    "/replenish",
+    auth("manageInventory"),
+    validator.body(productValidation.updateStock),
+    productController.replenishStock
+);
 
 module.exports = router;
