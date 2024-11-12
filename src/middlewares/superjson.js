@@ -11,10 +11,7 @@ const deserializeSuperJson = (req, res, next) => {
             try {
                 const parsedData = JSON.parse(data);
                 // Check if the parsed data is in the SuperJSON format
-                if (
-                    parsedData.hasOwnProperty("json") &&
-                    parsedData.hasOwnProperty("meta")
-                ) {
+                if (parsedData.hasOwnProperty("json")) {
                     req.body = superjson.deserialize(parsedData);
                 } else {
                     req.body = parsedData;
@@ -34,7 +31,7 @@ const serializeSuperJson = (req, res, next) => {
     const originalSend = res.send;
     res.send = function (body) {
         if (typeof body === "object" && typeof body !== null) {
-            body = superjson.stringify(body); 
+            body = superjson.stringify(body);
         }
         return originalSend.call(this, body);
     };
