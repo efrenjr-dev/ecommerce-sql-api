@@ -1,6 +1,6 @@
 const superjson = require("superjson");
 
-// Custom middleware to handle SuperJSON deserialization
+// Custom middleware to handle SuperJSON deserialization for JSON content only
 const deserializeSuperJson = (req, res, next) => {
     if (req.is("application/json")) {
         let data = "";
@@ -10,7 +10,11 @@ const deserializeSuperJson = (req, res, next) => {
         req.on("end", () => {
             try {
                 const parsedData = JSON.parse(data);
-                if (parsedData.hasOwnProperty("json")) {
+                // Check if the parsed data is in the SuperJSON format
+                if (
+                    parsedData.hasOwnProperty("json") &&
+                    parsedData.hasOwnProperty("meta")
+                ) {
                     req.body = superjson.deserialize(parsedData);
                 } else {
                     req.body = parsedData;
@@ -29,8 +33,8 @@ const deserializeSuperJson = (req, res, next) => {
 const serializeSuperJson = (req, res, next) => {
     const originalSend = res.send;
     res.send = function (body) {
-        if (typeof body === "object") {
-            body = superjson.stringify(body);
+        if (typeof body === "object" && typeof body !== null) {
+            body = superjson.stringify(body); 
         }
         return originalSend.call(this, body);
     };
