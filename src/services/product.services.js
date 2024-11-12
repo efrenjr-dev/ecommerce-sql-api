@@ -4,7 +4,6 @@ const { prisma, xprisma } = require("../utils/prisma");
 const logger = require("../config/logger");
 
 const createProduct = async (productBody) => {
-    logger.debug(productBody.name);
     const newProduct = await prisma.product.create({
         data: {
             name: productBody.name,
@@ -20,7 +19,6 @@ const createProduct = async (productBody) => {
 };
 
 const updateProduct = async (productId, updateBody) => {
-    logger.debug(updateBody.name);
     const updatedProduct = await prisma.product.update({
         where: { id: productId },
         data: {

@@ -65,6 +65,7 @@ const environmentVariablesSchema = Joi.object()
         EMAIL_FROM: Joi.string()
             .required()
             .description("Email that appears on From field"),
+        EMAIL_URL: Joi.string().uri().required(),
     })
     .prefs({ errors: { label: "key" } })
     .unknown();
@@ -119,5 +120,6 @@ module.exports = {
             },
         },
         from: environmentVariables.EMAIL_FROM,
+        url: environmentVariables.EMAIL_URL,
     },
 };

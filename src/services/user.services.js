@@ -72,7 +72,6 @@ const getUsers = async (searchString, skip, take) => {
  * @returns {Promise<User>}
  */
 const updateUser = async (userId, updateBody) => {
-    logger.debug(`updateBody.email ${updateBody.email}`);
     if (
         updateBody.email &&
         (await xprisma.user.isEmailTaken(updateBody.email, userId))

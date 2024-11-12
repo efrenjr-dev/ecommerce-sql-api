@@ -27,22 +27,21 @@ const login = catchAsync(async (req, res) => {
     const user = await authService.loginUser(email, password);
     const tokens = await tokenService.generateAuthTokens(user);
     res.status(httpStatus.OK)
-        .cookie("accessToken", tokens.access.token, {
-            expires: tokens.access.expires,
-            secure: true,
-            sameSite: "None",
-        })
-        .cookie("refreshToken", tokens.refresh.token, {
-            expires: tokens.refresh.expires,
-            secure: true,
-            sameSite: "None",
-        })
-        .send({ user });
+        // .cookie("accessToken", tokens.access.token, {
+        //     expires: tokens.access.expires,
+        //     secure: true,
+        //     sameSite: "None",
+        // })
+        // .cookie("refreshToken", tokens.refresh.token, {
+        //     expires: tokens.refresh.expires,
+        //     secure: true,
+        //     sameSite: "None",
+        // })
+        .send({ user, tokens });
 });
 
 const logout = catchAsync(async (req, res) => {
     logger.debug("LOGOUT USER");
-    logger.debug(req.query.token);
     await tokenService.blacklistToken(req.query.token);
     res.status(httpStatus.NO_CONTENT).send();
 });
@@ -52,17 +51,17 @@ const refreshTokens = catchAsync(async (req, res) => {
     const { refreshToken } = req.body;
     const tokens = await authService.refreshAuth(refreshToken);
     res.status(httpStatus.OK)
-        .cookie("accessToken", tokens.access.token, {
-            expires: tokens.access.expires,
-            secure: true,
-            sameSite: "None",
-        })
-        .cookie("refreshToken", tokens.refresh.token, {
-            expires: tokens.refresh.expires,
-            secure: true,
-            sameSite: "None",
-        })
-        .send({ message: "Refreshed tokens" });
+        // .cookie("accessToken", tokens.access.token, {
+        //     expires: tokens.access.expires,
+        //     secure: true,
+        //     sameSite: "None",
+        // })
+        // .cookie("refreshToken", tokens.refresh.token, {
+        //     expires: tokens.refresh.expires,
+        //     secure: true,
+        //     sameSite: "None",
+        // })
+        .send({ message: "Refreshed tokens", tokens });
 });
 
 const forgotPassword = catchAsync(async (req, res) => {

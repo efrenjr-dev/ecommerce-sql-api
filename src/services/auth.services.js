@@ -22,8 +22,8 @@ const loginUser = async (email, password) => {
             "User email does not exist or password is incorrect."
         );
     }
-    const isPasswordMatch = await bcrypt.compare(user.password, password);
-    if (isPasswordMatch) {
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
         throw new ApiError(
             httpStatus.UNAUTHORIZED,
             "User email does not exist or password is incorrect."

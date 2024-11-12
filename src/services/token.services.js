@@ -62,7 +62,6 @@ const blacklistToken = async (token) => {
         where: { token: hashedToken, blacklisted: false },
         data: { blacklisted: true },
     });
-    logger.debug(Object.entries(tokenUpdate));
     return !!tokenUpdate;
 };
 
@@ -123,7 +122,6 @@ const generateAuthTokens = async (user) => {
         refreshExpiry,
         tokenTypes.REFRESH
     );
-
     await saveToken(refreshToken, user.id, tokenTypes.REFRESH, refreshExpiry);
 
     return {

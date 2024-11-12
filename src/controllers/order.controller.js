@@ -12,8 +12,6 @@ const getOrderDetails = catchAsync(async (req, res) => {
 const getOrders = catchAsync(async (req, res) => {
     logger.debug("GET USER ORDERS CONTROLLER");
     const { skip, take } = req.query;
-    logger.debug("Skip: ", skip);
-    logger.debug("Take: ", take);
     const orders = await orderService.getOrders(req.user.id, skip, take);
     res.status(httpStatus.OK).send(orders);
 });
@@ -21,8 +19,6 @@ const getOrders = catchAsync(async (req, res) => {
 const getAllOrders = catchAsync(async (req, res) => {
     logger.debug("GET ALL ORDERS CONTROLLER");
     const { skip, take } = req.query;
-    logger.debug("Skip: ", skip);
-    logger.debug("Take: ", take);
     const orders = await orderService.getAllOrders(skip, take);
     res.status(httpStatus.OK).send(orders);
 });
