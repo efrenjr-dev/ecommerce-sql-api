@@ -39,7 +39,7 @@ const getProductById = async (productId) => {
 };
 
 const getProducts = async (searchString, skip, take) => {
-    return prisma.product.findMany({
+    const products = await prisma.product.findMany({
         skip: parseInt(skip),
         take: parseInt(take),
         where: {
@@ -58,10 +58,19 @@ const getProducts = async (searchString, skip, take) => {
             },
         },
     });
+
+    const productsCount = await prisma.product.count({
+        where: {
+            OR: [{ name: { contains: searchString, mode: "insensitive" } }],
+            Product_Inventory: { quantity: { gt: 0 } },
+            isActive: true,
+        },
+    });
+    return { products, productsCount };
 };
 
 const getAllProducts = async (searchString, skip, take) => {
-    return prisma.product.findMany({
+    const products = await prisma.product.findMany({
         skip: parseInt(skip),
         take: parseInt(take),
         where: {
@@ -78,6 +87,13 @@ const getAllProducts = async (searchString, skip, take) => {
             },
         },
     });
+
+    const productsCount = await prisma.product.count({
+        where: {
+            OR: [{ name: { contains: searchString, mode: "insensitive" } }],
+        },
+    });
+    return { products, productsCount };
 };
 
 const consumeStock = async (productId, quantity) => {

@@ -27,21 +27,33 @@ const getProduct = catchAsync(async (req, res) => {
 const getProducts = catchAsync(async (req, res) => {
     logger.debug("GET PRODUCTS");
     const { searchString, skip, take } = req.query;
-    const products = await productService.getProducts(searchString, skip, take);
+    const { products, productsCount } = await productService.getProducts(
+        searchString,
+        skip,
+        take
+    );
     if (!products) {
         throw new ApiError(httpStatus.NOT_FOUND, "No product found");
     }
-    res.status(httpStatus.OK).send(products);
+    const hasMore = parseInt(skip) + parseInt(take) < productsCount;
+    console.log("hasMore:", hasMore, "=", skip, "+", take, "<", productsCount);
+    res.status(httpStatus.OK).send({ products, productsCount, hasMore });
 });
 
 const getAllProducts = catchAsync(async (req, res) => {
     logger.debug("GET ALL PRODUCTS");
     const { searchString, skip, take } = req.query;
-    const products = await productService.getAllProducts(searchString, skip, take);
+    const { products, productsCount } = await productService.getAllProducts(
+        searchString,
+        skip,
+        take
+    );
     if (!products) {
         throw new ApiError(httpStatus.NOT_FOUND, "No product found");
     }
-    res.status(httpStatus.OK).send(products);
+    const hasMore = parseInt(skip) + parseInt(take) < productsCount;
+    logger.debug("hasMore:", hasMore, "=", skip, "+", take, "<", productsCount);
+    res.status(httpStatus.OK).send({ products, productsCount, hasMore });
 });
 
 const consumeStock = catchAsync(async (req, res) => {

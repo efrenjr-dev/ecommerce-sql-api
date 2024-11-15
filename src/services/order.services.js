@@ -13,6 +13,7 @@ const getOrderDetails = async (orderId) => {
             },
             User: {
                 select: {
+                    id: true,
                     name: true,
                 },
             },
@@ -21,7 +22,7 @@ const getOrderDetails = async (orderId) => {
 };
 
 const getOrders = async (userId, skip, take) => {
-    return await prisma.order_Details.findMany({
+    const orders = await prisma.order_Details.findMany({
         where: { userId: userId },
         skip: parseInt(skip),
         take: parseInt(take),
@@ -29,22 +30,26 @@ const getOrders = async (userId, skip, take) => {
             createdAt: "desc",
         },
     });
+    const ordersCount = await prisma.order_Details.count({
+        where: { userId: userId },
+    });
+    return { orders, ordersCount };
 };
 
 const getAllOrders = async (skip, take) => {
-    return await prisma.order_Details.findMany({
+    const orders = await prisma.order_Details.findMany({
         include: {
             Order_Item: true,
         },
         skip: parseInt(skip),
         take: parseInt(take),
-        // where: {
-        //     OR: [{ name: { contains: searchString, mode: "insensitive" } }],
-        // },
         orderBy: {
             createdAt: "desc",
         },
     });
+    const ordersCount = await prisma.order_Details.count({});
+
+    return { orders, ordersCount };
 };
 
 module.exports = { getOrderDetails, getOrders, getAllOrders };
