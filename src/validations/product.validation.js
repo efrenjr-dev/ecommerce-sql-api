@@ -11,6 +11,7 @@ const updateProduct = Joi.object({
     name: Joi.string(),
     price: Joi.number().greater(0),
     description: Joi.string(),
+    isActive: Joi.boolean(),
 });
 
 const updateStock = Joi.object({

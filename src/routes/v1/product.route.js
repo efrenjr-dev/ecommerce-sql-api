@@ -22,7 +22,7 @@ router
     .get(productController.getProduct)
     .patch(
         auth("manageProducts"),
-        validator.body(productValidation),
+        validator.body(productValidation.updateProduct),
         productController.updateProduct
     );
 

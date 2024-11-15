@@ -45,6 +45,7 @@ const getProducts = async (searchString, skip, take) => {
         where: {
             OR: [{ name: { contains: searchString, mode: "insensitive" } }],
             Product_Inventory: { quantity: { gt: 0 } },
+            isActive: true,
         },
         orderBy: {
             name: "asc",
