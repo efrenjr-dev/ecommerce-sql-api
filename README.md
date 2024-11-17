@@ -73,7 +73,7 @@ Authenticated user should include Access Token thru HTTP authorization header as
 
 ``` json
 { 
-"email": "admin@mail.com",
+"email": "admin@example.com",
 "password": "admin123"
 }
 
