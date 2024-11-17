@@ -36,7 +36,6 @@ const getProducts = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.NOT_FOUND, "No product found");
     }
     const hasMore = parseInt(skip) + parseInt(take) < productsCount;
-    console.log("hasMore:", hasMore, "=", skip, "+", take, "<", productsCount);
     res.status(httpStatus.OK).send({ products, productsCount, hasMore });
 });
 
