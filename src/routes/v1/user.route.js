@@ -8,14 +8,7 @@ const validator = require("express-joi-validation").createValidator({
 
 const router = express.Router();
 
-router
-    .route("/")
-    .get(auth(), userController.getUserDetails)
-    .post(
-        auth("manageUsers"),
-        validator.body(userValidation.createUser),
-        userController.createUser
-    );
+router.route("/all").get(auth("getUsers"), userController.getUsers);
 
 router
     .route("/:userId")
@@ -31,6 +24,13 @@ router
         userController.updateUser
     );
 
-router.route("/all").get(auth("getUsers"), userController.getUsers);
+router
+    .route("/")
+    .get(auth(), userController.getUserDetails)
+    .post(
+        auth("manageUsers"),
+        validator.body(userValidation.createUser),
+        userController.createUser
+    );
 
 module.exports = router;
