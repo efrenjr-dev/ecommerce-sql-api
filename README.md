@@ -69,7 +69,7 @@ The API returns request responses in serialized JSON format via [SuperJSON](http
 
 ### Authentication Token
 
-Authenticated user should include Refresh Token thru HTTP authorization header as Bearer token. This may be taken after registration of a new user account or logging in as an admin account -
+Authenticated user should include Access Token thru HTTP authorization header as Bearer token. This may be taken after registration of a new user account or logging in as an admin account -
 
 ``` json
 { 
