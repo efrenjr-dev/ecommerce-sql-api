@@ -7,7 +7,7 @@ const catchAsync = require("../utils/catchAsync");
 const createUser = catchAsync(async (req, res, next) => {
     logger.debug("CREATE USER");
     const user = await userService.createUser(req.body);
-    if (user.role === "user") await cartService.createCart(req.user.id);
+    if (user.role === "user") await cartService.createCart(user.id);
     res.status(httpStatus.CREATED).send(user);
 });
 
@@ -17,8 +17,7 @@ const getUser = catchAsync(async (req, res) => {
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
-    delete user.password;
-    res.status(httpStatus.FOUND).send(user);
+    res.status(httpStatus.OK).send(user);
 });
 
 const getUserDetails = catchAsync(async (req, res) => {
@@ -27,18 +26,23 @@ const getUserDetails = catchAsync(async (req, res) => {
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
-    delete user.password;
-    res.status(httpStatus.FOUND).send(user);
+    res.status(httpStatus.OK).send(user);
 });
 
 const getUsers = catchAsync(async (req, res) => {
     logger.debug("GET ALL USERS");
     const { searchString, skip, take } = req.query;
-    const users = await userService.getUsers(searchString, skip, take);
+    const { users, usersCount } = await userService.getUsers(
+        searchString,
+        skip,
+        take,
+        req.user.id
+    );
     if (!users) {
         throw new ApiError(httpStatus.NOT_FOUND, "No users found");
     }
-    res.status(httpStatus.FOUND).send(users);
+    const hasMore = parseInt(skip) + parseInt(take) < usersCount;
+    res.status(httpStatus.OK).send({ users, usersCount, hasMore });
 });
 
 const updateUser = catchAsync(async (req, res) => {

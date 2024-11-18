@@ -30,7 +30,10 @@ const createUser = async (userBody) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-    return await prisma.user.findUnique({ where: { id: id } });
+    return await prisma.user.findUnique({
+        where: { id: id },
+        omit: { password: true },
+    });
 };
 
 /**
@@ -44,10 +47,13 @@ const getUserByEmail = async (email) => {
 
 /**
  *
- * @returns {Promise<User>}
+ * @param {*} searchString
+ * @param {*} skip
+ * @param {*} take
+ * @returns {Promise<object>}
  */
-const getUsers = async (searchString, skip, take) => {
-    return prisma.user.findMany({
+const getUsers = async (searchString, skip, take, userId) => {
+    const users = await prisma.user.findMany({
         skip: parseInt(skip),
         take: parseInt(take),
         where: {
@@ -55,14 +61,29 @@ const getUsers = async (searchString, skip, take) => {
                 { email: { contains: searchString, mode: "insensitive" } },
                 { name: { contains: searchString, mode: "insensitive" } },
             ],
+            NOT: {
+                id: userId,
+            },
         },
-        orderBy: {
-            email: "asc",
-        },
+        orderBy: [{ role: "asc" }, { email: "asc" }],
         omit: {
             password: true,
         },
     });
+
+    const usersCount = await prisma.user.count({
+        where: {
+            OR: [
+                { email: { contains: searchString, mode: "insensitive" } },
+                { name: { contains: searchString, mode: "insensitive" } },
+            ],
+            NOT: {
+                id: userId,
+            },
+        },
+    });
+
+    return { users, usersCount };
 };
 
 /**
