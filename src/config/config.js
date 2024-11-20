@@ -65,7 +65,18 @@ const environmentVariablesSchema = Joi.object()
         EMAIL_FROM: Joi.string()
             .required()
             .description("Email that appears on From field"),
-        EMAIL_URL: Joi.string().uri().required(),
+        EMAIL_URL: Joi.string()
+            .uri()
+            .required()
+            .description("App URL to include in email"),
+        AWS_ACCESS_KEY_ID: Joi.string()
+            .required()
+            .description("AWS Access Key"),
+        AWS_SECRET_ACCESS_KEY: Joi.string()
+            .required()
+            .description("AWS Secret Key"),
+        AWS_REGION: Joi.string().required().description("AWS Region"),
+        AWS_BUCKET_NAME: Joi.string().required().description("AWS Bucket Name"),
     })
     .prefs({ errors: { label: "key" } })
     .unknown();
@@ -121,5 +132,11 @@ module.exports = {
         },
         from: environmentVariables.EMAIL_FROM,
         url: environmentVariables.EMAIL_URL,
+    },
+    aws: {
+        accessKey: environmentVariables.AWS_ACCESS_KEY_ID,
+        secretKey: environmentVariables.AWS_SECRET_ACCESS_KEY,
+        region: environmentVariables.AWS_REGION,
+        bucketName: environmentVariables.AWS_BUCKET_NAME,
     },
 };

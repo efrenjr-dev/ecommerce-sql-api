@@ -1,17 +1,34 @@
 const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
-const { prisma, xprisma } = require("../utils/prisma");
+const { prisma } = require("../utils/prisma");
+const { uploadToS3 } = require("../utils/uploadToS3");
 const logger = require("../config/logger");
 
-const createProduct = async (productBody) => {
+const createProduct = async (productData, files) => {
+    const { name, description, price, quantity } = productData;
+    if (!files || files.length === 0) {
+        throw new Error("At least one image is required.");
+    }
+    logger.debug("Ready to upload images");
+    const imageUrls = await Promise.all(files.map((file) => uploadToS3(file)));
+
+    logger.debug("Images uploaded to URLs:", imageUrls.entries);
     const newProduct = await prisma.product.create({
         data: {
-            name: productBody.name,
-            price: productBody.price,
-            description: productBody.description,
+            name: name,
+            price: parseFloat(price),
+            description: description,
             Product_Inventory: {
-                create: { quantity: productBody.quantity },
+                create: { quantity: parseInt(quantity) },
             },
+            Image: {
+                create: imageUrls.map((url) => ({
+                    url: url,
+                })),
+            },
+        },
+        include: {
+            Image: true,
         },
     });
 
@@ -34,7 +51,11 @@ const getProductById = async (productId) => {
         where: {
             id: productId,
         },
-        include: { Product_Inventory: true, Product_Category: true },
+        include: {
+            Product_Inventory: true,
+            Product_Category: true,
+            Image: true,
+        },
     });
 };
 

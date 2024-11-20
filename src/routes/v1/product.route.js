@@ -1,7 +1,9 @@
 const express = require("express");
+
 const { auth } = require("../../middlewares/auth");
 const { productController } = require("../../controllers/");
 const { productValidation } = require("../../validations");
+const { upload } = require("../../middlewares/upload");
 const validator = require("express-joi-validation").createValidator({
     passError: true,
 });
@@ -13,6 +15,7 @@ router
     .get(productController.getProducts)
     .post(
         auth("manageProducts"),
+        upload.array("images", 5),
         validator.body(productValidation.createProduct),
         productController.createProduct
     );

@@ -5,7 +5,12 @@ const { productService } = require("../services");
 
 const createProduct = catchAsync(async (req, res) => {
     logger.debug("CREATE PRODUCT CONTROLLER");
-    const product = await productService.createProduct(req.body);
+    const { name, description, quantity, price } = req.body;
+    const files = req.files;
+    const product = await productService.createProduct(
+        { name, description, quantity, price },
+        files
+    );
     res.status(httpStatus.CREATED).send(product);
 });
 
