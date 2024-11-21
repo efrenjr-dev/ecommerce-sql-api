@@ -1,6 +1,6 @@
 # E-Commerce SQL API
 
-This repository contains the backend code for an E-commerce application. The API is built using modern web technologies to manage product data, user accounts, and inventory, while integrating third-party services for efficient and scalable features such as image storage and data management.
+This repository contains the backend code for an E-commerce application https://github.com/efrenjr-dev/ecommerce-react. The API is built using modern web technologies to manage product data, user accounts, and inventory, while integrating third-party services for efficient and scalable features such as image storage and data management.
 
 Complete API routes documentation is available at https://documenter.getpostman.com/view/17327200/2sAYBPmaHv
 
