@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const { prisma } = require("../utils/prisma");
-const { uploadToS3 } = require("../utils/uploadToS3");
+const { uploadToS3, deleteImagesFromS3 } = require("../utils/S3ObjectCommands");
 const logger = require("../config/logger");
 
 const createProduct = async (productData, files) => {
@@ -12,7 +12,7 @@ const createProduct = async (productData, files) => {
     logger.debug("Ready to upload images");
     const imageUrls = await Promise.all(files.map((file) => uploadToS3(file)));
 
-    logger.debug("Images uploaded to URLs:", imageUrls.entries);
+    logger.debug("Images uploaded to URLs:", imageUrls);
     const newProduct = await prisma.product.create({
         data: {
             name: name,
@@ -35,14 +35,69 @@ const createProduct = async (productData, files) => {
     return newProduct;
 };
 
-const updateProduct = async (productId, updateBody) => {
+const updateProduct = async (productId, updateData) => {
+    console.log(updateData);
+    const { name, description, price, isActive, existingImages, newImages } =
+        updateData;
+
+    const product = await prisma.product.findUnique({
+        where: { id: productId },
+        include: { Image: true },
+    });
+
+    const existingImageIds = existingImages
+        ? existingImages.map((image) => image.id)
+        : [];
+
+    const imageIdsToDelete = product.Image.filter(
+        (image) => !existingImageIds.includes(image.id)
+    ).map((image) => image.id);
+
+    logger.debug("imageIdsToDelete: ", imageIdsToDelete);
+
+    if (imageIdsToDelete.length > 0) {
+        const imagesToDelete = product.Image.filter((image) =>
+            imageIdsToDelete.includes(image.id)
+        );
+        const imageUrlsToDelete = imagesToDelete.map((image) => image.url);
+
+        await deleteImagesFromS3(imageUrlsToDelete);
+
+        await prisma.image.deleteMany({
+            where: { id: { in: imageIdsToDelete } },
+        });
+    }
+
+    if (newImages && newImages.length > 0) {
+        const uploadedImages = await Promise.all(
+            newImages.map(async (file) => {
+                const uploadedImageUrl = await uploadToS3(file);
+                return { url: uploadedImageUrl }; // New image will have no ID (id is null in database)
+            })
+        );
+
+        await prisma.image.createMany({
+            data: uploadedImages.map((image) => ({
+                url: image.url,
+                productId: productId,
+            })),
+        });
+    }
+
     const updatedProduct = await prisma.product.update({
         where: { id: productId },
         data: {
-            ...updateBody,
+            name,
+            description,
+            price,
+            isActive,
             updatedAt: new Date(),
         },
+        include: {
+            Image: true,
+        },
     });
+
     return updatedProduct;
 };
 

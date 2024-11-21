@@ -15,10 +15,19 @@ const createProduct = catchAsync(async (req, res) => {
 });
 
 const updateProduct = catchAsync(async (req, res) => {
+    const { name, description, price, isActive, existingImages } = req.body;
+    const newImages = req.files || [];
     logger.debug("UPDATE PRODUCT CONTROLLER");
     const updatedProduct = await productService.updateProduct(
         req.params.productId,
-        req.body
+        {
+            name,
+            description,
+            price: parseFloat(price),
+            isActive,
+            existingImages,
+            newImages,
+        }
     );
     res.status(httpStatus.ACCEPTED).send(updatedProduct);
 });

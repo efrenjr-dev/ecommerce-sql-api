@@ -4,6 +4,7 @@ const { auth } = require("../../middlewares/auth");
 const { productController } = require("../../controllers/");
 const { productValidation } = require("../../validations");
 const { upload } = require("../../middlewares/upload");
+const json = require("superjson");
 const validator = require("express-joi-validation").createValidator({
     passError: true,
 });
@@ -25,6 +26,13 @@ router
     .get(productController.getProduct)
     .patch(
         auth("manageProducts"),
+        upload.array("newImages", 5),
+        (req, res, next) => {
+            req.body.existingImages = req.body.existingImages
+                ? json.parse(req.body.existingImages)
+                : [];
+            next();
+        },
         validator.body(productValidation.updateProduct),
         productController.updateProduct
     );
