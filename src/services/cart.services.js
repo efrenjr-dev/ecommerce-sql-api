@@ -114,6 +114,15 @@ const updateCartItem = async (userId, cartItemId, updateBody) => {
                                 name: true,
                                 price: true,
                                 description: true,
+                                Image: {
+                                    select: {
+                                        url: true,
+                                    },
+                                    take: 1,
+                                    orderBy: {
+                                        created_at: "asc",
+                                    },
+                                },
                             },
                         },
                     },
@@ -162,6 +171,15 @@ const removeFromCart = async (userId, cartItemId) => {
                                 name: true,
                                 price: true,
                                 description: true,
+                                Image: {
+                                    select: {
+                                        url: true,
+                                    },
+                                    take: 1,
+                                    orderBy: {
+                                        created_at: "asc",
+                                    },
+                                },
                             },
                         },
                     },
@@ -206,6 +224,15 @@ const getCart = async (userId) => {
                             name: true,
                             price: true,
                             description: true,
+                            Image: {
+                                select: {
+                                    url: true,
+                                },
+                                take: 1,
+                                orderBy: {
+                                    created_at: "asc",
+                                },
+                            },
                         },
                     },
                 },

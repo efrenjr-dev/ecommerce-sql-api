@@ -36,7 +36,6 @@ const createProduct = async (productData, files) => {
 };
 
 const updateProduct = async (productId, updateData) => {
-    console.log(updateData);
     const { name, description, price, isActive, existingImages, newImages } =
         updateData;
 
@@ -52,8 +51,6 @@ const updateProduct = async (productId, updateData) => {
     const imageIdsToDelete = product.Image.filter(
         (image) => !existingImageIds.includes(image.id)
     ).map((image) => image.id);
-
-    logger.debug("imageIdsToDelete: ", imageIdsToDelete);
 
     if (imageIdsToDelete.length > 0) {
         const imagesToDelete = product.Image.filter((image) =>
@@ -132,6 +129,15 @@ const getProducts = async (searchString, skip, take) => {
                     quantity: true,
                 },
             },
+            Image: {
+                select: {
+                    url: true,
+                },
+                take: 1,
+                orderBy: {
+                    created_at: "asc",
+                },
+            },
         },
     });
 
@@ -159,6 +165,15 @@ const getAllProducts = async (searchString, skip, take) => {
             Product_Inventory: {
                 select: {
                     quantity: true,
+                },
+            },
+            Image: {
+                select: {
+                    url: true,
+                },
+                take: 1,
+                orderBy: {
+                    created_at: "asc",
                 },
             },
         },

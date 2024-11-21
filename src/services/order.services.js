@@ -9,7 +9,21 @@ const getOrderDetails = async (orderId) => {
         where: { id: orderId },
         include: {
             Order_Item: {
-                include: { Product: true },
+                include: {
+                    Product: {
+                        include: {
+                            Image: {
+                                select: {
+                                    url: true,
+                                },
+                                take: 1,
+                                orderBy: {
+                                    created_at: "asc",
+                                },
+                            },
+                        },
+                    },
+                },
             },
             User: {
                 select: {
