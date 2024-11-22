@@ -8,22 +8,21 @@ Complete API routes documentation is available at https://documenter.getpostman.
 
 ### Backend Frameworks and Libraries
 
-- **Node.js**: JavaScript runtime environment for building scalable server-side applications.
-- **Express.js**: Web framework for creating RESTful APIs and middleware.
-- **Prisma ORM**: Modern ORM for database queries with schema migrations and type safety.
+- **Node.js**
+- **Express.js**
+- **Prisma ORM**
 
 ### Database
 
-- **PostgreSQL**: Relational database for storing structured data, including products, users, orders, and inventory.
+- **PostgreSQL via Supabase**
 
 ### Cloud Storage
 
-- **Amazon S3**: Used for storing and serving product images. S3 ensures scalable and durable image storage with public access settings for optimized performance.
+- **Amazon S3**: Used for storing and serving product images.
 
 ### Authentication and Security
 
-- **JSON Web Tokens (JWT)**: Provides secure authentication and user session management with refresh token rotation.
-- **Helmet.js**: Adds security-related HTTP headers to protect against vulnerabilities.
+- **JSON Web Tokens (JWT)**: Provides user session management with refresh token rotation.
 
 ### Validation
 
@@ -71,9 +70,8 @@ Complete API routes documentation is available at https://documenter.getpostman.
 
 ### Additional Features
 
-- **Search and Filtering**: Comprehensive search capabilities for finding products efficiently.
+- **Search and Filtering**
 - **Image Uploads**: Handles product image uploads with Amazon S3 for scalable storage.
-- **Interactive API Documentation**: Explore endpoints with detailed examples and descriptions.
 
 
 ## **Getting started guide**
@@ -112,5 +110,5 @@ If a token is missing, malformed, or invalid, you will receive an HTTP 401 Unaut
 
 ## Rate and usage limits
 
-The limit is 300 requests per minute. If you exceed either limit, your request will return an HTTP 429 Too Many Requests status code.
+The limit is 300 requests per minute by default and can be set through updating environment variables. If you exceed the limit, your request will return an HTTP 429 Too Many Requests status code.
 
