@@ -53,7 +53,11 @@ const getOrders = async (userId, skip, take) => {
 const getAllOrders = async (skip, take) => {
     const orders = await prisma.order_Details.findMany({
         include: {
-            Order_Item: true,
+            User: {
+                select: {
+                    name: true,
+                },
+            },
         },
         skip: parseInt(skip),
         take: parseInt(take),
