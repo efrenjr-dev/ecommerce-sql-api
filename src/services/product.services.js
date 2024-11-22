@@ -39,10 +39,16 @@ const updateProduct = async (productId, updateData) => {
     const { name, description, price, isActive, existingImages, newImages } =
         updateData;
 
+    let imageUrlsToDelete = [];
+
     const product = await prisma.product.findUnique({
         where: { id: productId },
         include: { Image: true },
     });
+
+    if (!product) {
+        throw new Error(`Product with ID ${productId} not found.`);
+    }
 
     const existingImageIds = existingImages
         ? existingImages.map((image) => image.id)
@@ -52,48 +58,52 @@ const updateProduct = async (productId, updateData) => {
         (image) => !existingImageIds.includes(image.id)
     ).map((image) => image.id);
 
-    if (imageIdsToDelete.length > 0) {
-        const imagesToDelete = product.Image.filter((image) =>
-            imageIdsToDelete.includes(image.id)
-        );
-        const imageUrlsToDelete = imagesToDelete.map((image) => image.url);
+    const updatedProduct = await prisma.$transaction(async (tx) => {
+        if (imageIdsToDelete.length > 0) {
+            const imagesToDelete = product.Image.filter((image) =>
+                imageIdsToDelete.includes(image.id)
+            );
+            imageUrlsToDelete = imagesToDelete.map((image) => image.url);
 
-        await deleteImagesFromS3(imageUrlsToDelete);
+            await tx.image.deleteMany({
+                where: { id: { in: imageIdsToDelete } },
+            });
+        }
 
-        await prisma.image.deleteMany({
-            where: { id: { in: imageIdsToDelete } },
+        if (newImages && newImages.length > 0) {
+            const uploadedImages = await Promise.all(
+                newImages.map(async (file) => {
+                    const uploadedImageUrl = await uploadToS3(file);
+                    return { url: uploadedImageUrl }; // New image will have no ID (id is null in database)
+                })
+            );
+
+            await tx.image.createMany({
+                data: uploadedImages.map((image) => ({
+                    url: image.url,
+                    productId: productId,
+                })),
+            });
+        }
+
+        return await tx.product.update({
+            where: { id: productId },
+            data: {
+                name,
+                description,
+                price,
+                isActive,
+                updatedAt: new Date(),
+            },
+            include: {
+                Image: true,
+            },
         });
-    }
-
-    if (newImages && newImages.length > 0) {
-        const uploadedImages = await Promise.all(
-            newImages.map(async (file) => {
-                const uploadedImageUrl = await uploadToS3(file);
-                return { url: uploadedImageUrl }; // New image will have no ID (id is null in database)
-            })
-        );
-
-        await prisma.image.createMany({
-            data: uploadedImages.map((image) => ({
-                url: image.url,
-                productId: productId,
-            })),
-        });
-    }
-
-    const updatedProduct = await prisma.product.update({
-        where: { id: productId },
-        data: {
-            name,
-            description,
-            price,
-            isActive,
-            updatedAt: new Date(),
-        },
-        include: {
-            Image: true,
-        },
     });
+
+    if (imageUrlsToDelete.length > 0) {
+        await deleteImagesFromS3(imageUrlsToDelete);
+    }
 
     return updatedProduct;
 };
@@ -120,9 +130,9 @@ const getProducts = async (searchString, skip, take) => {
             Product_Inventory: { quantity: { gt: 0 } },
             isActive: true,
         },
-        orderBy: {
-            name: "asc",
-        },
+        // orderBy: {
+        //     name: "asc",
+        // },
         include: {
             Product_Inventory: {
                 select: {
@@ -134,9 +144,6 @@ const getProducts = async (searchString, skip, take) => {
                     url: true,
                 },
                 take: 1,
-                orderBy: {
-                    created_at: "asc",
-                },
             },
         },
     });
@@ -158,9 +165,9 @@ const getAllProducts = async (searchString, skip, take) => {
         where: {
             OR: [{ name: { contains: searchString, mode: "insensitive" } }],
         },
-        orderBy: {
-            name: "asc",
-        },
+        // orderBy: {
+        //     name: "asc",
+        // },
         include: {
             Product_Inventory: {
                 select: {
@@ -172,9 +179,6 @@ const getAllProducts = async (searchString, skip, take) => {
                     url: true,
                 },
                 take: 1,
-                orderBy: {
-                    created_at: "asc",
-                },
             },
         },
     });
