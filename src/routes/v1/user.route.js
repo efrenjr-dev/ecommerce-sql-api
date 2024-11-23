@@ -11,6 +11,14 @@ const router = express.Router();
 router.route("/all").get(auth("getUsers"), userController.getUsers);
 
 router
+    .route("/profile")
+    .patch(
+        auth(),
+        validator.body(userValidation.updateUser),
+        userController.updateProfile
+    );
+
+router
     .route("/:userId")
     .get(
         auth("getUsers"),

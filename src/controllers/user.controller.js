@@ -57,10 +57,23 @@ const updateUser = catchAsync(async (req, res) => {
     res.status(httpStatus.ACCEPTED).send(user);
 });
 
+const updateProfile = catchAsync(async (req, res) => {
+    logger.debug("UPDATE USER PROFILE");
+    const user = await userService.updateUser(req.user.id, req.body);
+    if (!user) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            "Unable to update user record"
+        );
+    }
+    res.status(httpStatus.ACCEPTED).send(user);
+});
+
 module.exports = {
     createUser,
     getUser,
     getUsers,
     updateUser,
     getUserDetails,
+    updateProfile,
 };
